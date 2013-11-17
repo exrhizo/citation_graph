@@ -8,9 +8,9 @@ from pdfminer.layout import LAParams
 from pdfminer.converter import PDFPageAggregator
 from pdfminer.layout import LAParams, LTTextBox, LTTextLine, LTFigure, LTImage
 #from pdfminer.pdfpage import PDFTextExtractionNotAllowed
-
+import re
 # Open a PDF file.
-fp = open('2009 Bellesia Local vs Global propensity.pdf', 'rb')
+fp = open('./test_papers/2009 Shea Local vs Global propensity.pdf', 'rb')
 # Create a PDF parser object associated with the file object.
 parser = PDFParser(fp)
 # Create a PDF document object that stores the document structure.
@@ -31,7 +31,9 @@ laparams = LAParams()
 # Create a PDF page aggregator object.
 device = PDFPageAggregator(rsrcmgr, laparams=laparams)
 interpreter = PDFPageInterpreter(rsrcmgr, device)
-
+#\W*([A-Z ,])\(\d
+author_pattern = re.compile('\d+\.(.*)\(\d')
+#lt_obj.get_text()
 text_content = []
 for page in PDFPage.create_pages(document):
     interpreter.process_page(page)
@@ -39,6 +41,11 @@ for page in PDFPage.create_pages(document):
     layout = device.get_result()
     for lt_obj in layout._objs:
         if isinstance(lt_obj, LTTextBox) or isinstance(lt_obj, LTTextLine):
-            text_content.append(lt_obj.get_text())
-print '\n'.join(text_content)
-    
+    	    cur_line = lt_obj.get_text()
+    	    #print cur_line
+    	    #print "\n NEW LINE \n"
+            match = author_pattern.match(cur_line)
+            if match is not None:
+                    match_span = match.span()
+                    print match.group(1)
+            #text_content.append(lt_obj.get_text())
