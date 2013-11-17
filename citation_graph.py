@@ -4,6 +4,9 @@ from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfinterp import PDFResourceManager
 from pdfminer.pdfinterp import PDFPageInterpreter
 from pdfminer.pdfdevice import PDFDevice
+from pdfminer.layout import LAParams
+from pdfminer.converter import PDFPageAggregator
+from pdfminer.layout import LAParams, LTTextBox, LTTextLine, LTFigure, LTImage
 #from pdfminer.pdfpage import PDFTextExtractionNotAllowed
 
 # Open a PDF file.
@@ -22,12 +25,20 @@ if not document.is_extractable:
 #    raise PDFTextExtractionNotAllowed
 # Create a PDF resource manager object that stores shared resources.
 rsrcmgr = PDFResourceManager()
-# Create a PDF device object.
-device = PDFDevice(rsrcmgr)
-# Create a PDF interpreter object.
+
+# Set parameters for analysis.
+laparams = LAParams()
+# Create a PDF page aggregator object.
+device = PDFPageAggregator(rsrcmgr, laparams=laparams)
 interpreter = PDFPageInterpreter(rsrcmgr, device)
-# Process each page contained in the document.
+
+text_content = []
 for page in PDFPage.create_pages(document):
     interpreter.process_page(page)
-    print page.__doc__
+    # receive the LTPage object for the page.
+    layout = device.get_result()
+    for lt_obj in layout._objs:
+        if isinstance(lt_obj, LTTextBox) or isinstance(lt_obj, LTTextLine):
+            text_content.append(lt_obj.get_text())
+print '\n'.join(text_content)
     
