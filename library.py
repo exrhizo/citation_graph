@@ -50,19 +50,21 @@ class Author:
 	def addPaper(self,paper):
 		self.papers.append(paper)
 
-lib = Library()
-paper = lib.getPaper("The discovery of things")
-paper.addAuthorIds(['sally','bob','alice'])
-paper.addCitationIds(['alice','sam','john'])
 
-paper2 = lib.getPaper("Another paper")
-paper2.addAuthorIds(['sam','kevin','alice'])
-paper2.addCitationIds(['sally','bob','alice'])
+if __name__ == "__main__":
+	lib = Library()
+	paper = lib.getPaper("The discovery of things")
+	paper.addAuthorIds(['sally','bob','alice'])
+	paper.addCitationIds(['alice','sam','john'])
 
-divider = ''.join('-' for x in range(10))
-for author in lib.authors.values():
-	print divider
-	print author.name
-	print len(author.papers)
-	for paper in author.papers:
-		print paper
+	paper2 = lib.getPaper("Another paper")
+	paper2.addAuthorIds(['sam','kevin','alice'])
+	paper2.addCitationIds(['sally','bob','alice'])
+
+	divider = ''.join('-' for x in range(10))
+	for author in lib.authors.values():
+		print divider
+		print author.name
+		print len(author.papers)
+		for paper in author.papers:
+			print paper
