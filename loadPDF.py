@@ -15,7 +15,24 @@ from library import Library, Paper, Author
 
 #\W*([A-Z ,])\(\d
 author_pattern = re.compile('\d+\.(.*)\(\d')
+pattern_ignore = re.compile('.*(\.|doi|\d\d\d\d).*',re.DEBUG)
 #lt_obj.get_text()
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+
+    def disable(self):
+        self.HEADER = ''
+        self.OKBLUE = ''
+        self.OKGREEN = ''
+        self.WARNING = ''
+        self.FAIL = ''
+        self.ENDC = ''
 
 def loadPDF(library, file_name):
 	"""adds a paper to the library"""
@@ -43,20 +60,31 @@ def loadPDF(library, file_name):
 	text_content = []
 	authors = []       #list of authors
 	citations = []     #list of authors that have been cited
-	for page in PDFPage.create_pages(document):
+
+	#pages_length = sum(1 for page in document.get_pages())
+
+	for ii, page in enumerate(PDFPage.create_pages(document)):
+		print '---------------------------------------------------------------------------------------------------'
+		print "page number {}".format(ii)
 		interpreter.process_page(page)
 		# receive the LTPage object for the page.
 		layout = device.get_result()
-		for lt_obj in layout._objs:
+		for jj, lt_obj in enumerate(layout._objs):
+			if jj>3:
+				break
 			if isinstance(lt_obj, LTTextBox) or isinstance(lt_obj, LTTextLine):
-				cur_line = lt_obj.get_text()
-				#print cur_line
-				#print "\n NEW LINE \n"
-				match = author_pattern.match(cur_line)
-				if match is not None:
-						match_span = match.span()
-						print match.group(1)
-				#text_content.append(lt_obj.get_text())
+				cur_line = lt_obj.get_text().encode('ascii', 'ignore')
+				match = pattern_ignore.match(cur_line)
+				if match is None and len(cur_line)<200:
+					print bcolors.OKGREEN +" "+cur_line+bcolors.ENDC
+				else:
+					print bcolors.FAIL+" "+cur_line[0:150]+bcolors.ENDC
+				
+			else:
+				print "PICTURE"
+		break
+
+
 	paper_title = file_name
 	paper = library.getPaper(paper_title)
 	paper.addAuthorIds(authors)
